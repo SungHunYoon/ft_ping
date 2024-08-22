@@ -1,5 +1,11 @@
 #include "ping.h"
 
+void	error_handling(char *str)
+{
+	dprintf(2, str);
+	exit(1);
+}
+
 double	diff_timeval(struct timeval time)
 {
 	double			ret;
@@ -35,10 +41,7 @@ char	*domain_to_ip(char *domain)
 
 	host = gethostbyname(domain);
 	if (!host)
-	{
-		dprintf(2, "ft_ping: unknown host\n");
-		exit(1);
-	}
+		error_handling("ft_ping: unknown host\n");
 	ret = NULL;
 	i = 0;
 	while (host->h_addr_list[i])

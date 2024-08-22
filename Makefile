@@ -1,13 +1,13 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -Werror
-SRCS = ./ping.c ./ping_packet.c ./ping_parsecmd.c ./ping_process.c ./ping_utils.c
+SRCS = ./ping.c ./ping_packet.c ./ping_parsecmd.c ./ping_process.c ./ping_utils.c ./ping_math.c
 OBJS = $(SRCS:.c=.o)
 NAME = ft_ping
 
 all : $(NAME)
 
 $(NAME) : $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -o $@

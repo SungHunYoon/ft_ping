@@ -41,43 +41,59 @@ t_ping	make_packet(int seq)
 void	send_packet(int sock, t_ping pkt, t_info *info)
 {
 	struct sockaddr_in	dest_addr;
+	int					len;
 
 	memset(&dest_addr, 0, sizeof(dest_addr));
 	dest_addr.sin_family = AF_INET;
-	dest_addr.sin_addr.s_addr = htonl(inet_addr(info->ip));
-	sendto(sock, &pkt, sizeof(pkt), 0 , (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+	dest_addr.sin_addr.s_addr = inet_addr(info->ip);
+	len = sendto(sock, &pkt, sizeof(pkt), 0,\
+		 (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+	if (len == -1) {
+		dprintf(2, "errno : %d\n", errno);
+		error_handling("ft_ping: sendto failed\n");
+	}
 	info->send_cnt++;
 }
 
-t_fping	recv_packet(int sock)
+t_fping	*recv_packet(int sock)
 {
-	t_fping				recv_pkt;
+	t_fping				*recv_pkt;
 	struct sockaddr_in	src_addr;
 	socklen_t			src_len;
 	uint8_t				buf[1024];
 	int 				len;
 
-	len = recvfrom(sock, buf, 1024, 0, (struct sockaddr *)&src_addr, &src_len);
-	if (len == -1)
-	{
-		dprintf(2, "recvfrom failed\n");
-		exit(1);
-	}
-	memcpy(&recv_pkt, buf, sizeof(recv_pkt.ip));
-	memcpy(&recv_pkt.ping, &buf[20], sizeof(recv_pkt.ping));
+	src_len = sizeof(src_addr);
+	len = recvfrom(sock, buf, 1024, MSG_DONTWAIT,\
+		 (struct sockaddr *)&src_addr, &src_len);
+	if (errno == EAGAIN && len == -1)
+		return NULL;
+	else if (len == -1)
+		error_handling("ft_ping: recvfrom failed\n");
+	recv_pkt = (t_fping *)malloc(sizeof(t_fping));
+	if (!recv_pkt)
+		error_handling("ft_ping: malloc failed\n");
+	memcpy(&recv_pkt->ip, buf, sizeof(recv_pkt->ip));
+	memcpy(&recv_pkt->ping, &buf[20], sizeof(recv_pkt->ping));
 	return recv_pkt;
 }
 
 void	parse_packet(t_fping pkt, t_info *info)
 {
+	double	diff_time;
+
 	if (pkt.ping.icmp.type != 0)
 	{
 		dprintf(2, "icmp proto error\n");
 		return;
 	}
+	if (pkt.ping.icmp.un.echo.id != SWAP16(info->pid))
+		return;
 	printf("%ld byte from ", SWAP16(pkt.ip.tot_len) - sizeof(pkt.ip));
 	printf("%s: ", int_to_str_ip(pkt.ip.saddr));
 	printf("icmp_seq: %d ", SWAP16(pkt.ping.icmp.un.echo.sequence));
-	printf("ttl=%d time=%.3lf ms\n", pkt.ip.ttl, diff_timeval(pkt.ping.time));
+	diff_time = diff_timeval(pkt.ping.time);
+	printf("ttl=%d time=%.3lf ms\n", pkt.ip.ttl, diff_time);
 	info->recv_cnt++;
+	update_statistics(diff_time, info);
 }

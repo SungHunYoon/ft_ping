@@ -14,6 +14,8 @@
 #include <netinet/ip.h>
 #include <netinet/ip_icmp.h>
 #include <netdb.h>
+#include <errno.h>
+#include <math.h>
 
 #define SWAP16(x) (((x >> 8) & 0xFF) | ((x << 8) & 0xFF00))
 
@@ -31,10 +33,15 @@ typedef struct s_fping {
 typedef struct s_info {
 	int		opt;
 	int		pid;
-	char	host[16];
-	char	ip[16];
+	char	*host;
+	char	*ip;
 	size_t	send_cnt;
 	size_t	recv_cnt;
+	double	min;
+	double	max;
+	double	avg;
+	double	m2;
+	double	stddev;
 } t_info;
 
 void	args_parsing(int argc, char **args, t_info *info);
@@ -44,11 +51,14 @@ void	ping_finish(t_info *info);
 
 t_ping	make_packet(int seq);
 void	send_packet(int sock, t_ping pkt, t_info *info);
-t_fping	recv_packet(int sock);
+t_fping	*recv_packet(int sock);
 void	parse_packet(t_fping pkt, t_info *info);
 
+void	error_handling(char *str);
 double	diff_timeval(struct timeval time);
 char	*int_to_str_ip(uint32_t addr);
 char	*domain_to_ip(char *domain);
+
+void	update_statistics(double x, t_info *info);
 
 #endif

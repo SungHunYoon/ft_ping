@@ -14,19 +14,30 @@ int	raw_socket_open(void)
 
 	raw_socket = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if(raw_socket < 0)
-	{
-		dprintf(2, "Create socket failed\n");
-		exit(1);
-	}
+		error_handling("ft_ping: create socket failed\n");
 	return raw_socket;
+}
+
+void	ping_recv_proc(int sock, t_info *info, struct timeval time)
+{
+	t_fping	*recv_pkt;
+
+	while (diff_timeval(time) <= 1000.0 && !g_stop)
+	{
+		recv_pkt = recv_packet(sock);
+		if (!recv_pkt)
+			continue;
+		parse_packet(*recv_pkt, info);
+	}
+	return;
 }
 
 void	ping_process(t_info *info)
 {
-	int		raw_socket;
-	t_ping	pkt;
-	t_fping	recv_pkt;
-	int		seq;
+	int				raw_socket;
+	t_ping			pkt;
+	struct timeval	time;
+	int				seq;
 
 	signal(SIGINT, sigint_handler);
 	raw_socket = raw_socket_open();
@@ -40,10 +51,9 @@ void	ping_process(t_info *info)
 	{
 		pkt = make_packet(seq);
 		send_packet(raw_socket, pkt, info);
-		recv_pkt = recv_packet(raw_socket);
-		parse_packet(recv_pkt, info);
+		gettimeofday(&time, NULL);
+		ping_recv_proc(raw_socket, info, time);
 		seq++;
-		sleep(1);
 	}
 }
 
@@ -55,6 +65,10 @@ void	ping_finish(t_info *info)
 	printf("%zu packets received, ", info->recv_cnt);
 	printf("%d%% packet loss\n", \
 		(int)((info->send_cnt - info->recv_cnt) * 100 / info->send_cnt));
-	printf("round-trip min/avg/max/stddev = ");
-	printf("%.3lf/%.3lf/%.3lf/%.3lf ms\n", 1.0, 1.0, 1.0, 1.0);
+	if (info->recv_cnt)
+	{
+		printf("round-trip min/avg/max/stddev = ");
+		printf("%.3lf/%.3lf/%.3lf/%.3lf ms\n", \
+			info->min, info->avg, info->max, info->stddev);
+	}
 }
