@@ -12,6 +12,7 @@ void	raw_socket_open(t_info *info)
 {
 	int			broadcast;
 	socklen_t	optlen;
+	uint8_t		ttl;
 
 	info->sock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP);
 	if (info->sock < 0)
@@ -19,7 +20,11 @@ void	raw_socket_open(t_info *info)
 	broadcast = 1;
 	optlen = sizeof(broadcast);
 	if (setsockopt(info->sock, SOL_SOCKET, SO_BROADCAST, \
-				(void *)&broadcast, optlen) < 0)
+				&broadcast, optlen) < 0)
+		error_handling("ft_ping: set socket opt broadcast failed\n");
+	ttl = 64;
+	optlen = sizeof(ttl);
+	if (setsockopt(info->sock, IPPROTO_IP, IP_TTL, &ttl, optlen) < 0)
 		error_handling("ft_ping: set socket opt broadcast failed\n");
 }
 

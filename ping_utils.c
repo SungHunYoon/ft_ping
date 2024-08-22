@@ -43,6 +43,8 @@ char	*domain_to_ip(char *domain)
 	if (!host)
 		error_handling("ft_ping: unknown host\n");
 	ret = NULL;
+	free(domain);
+	domain = strdup(host->h_name);
 	i = 0;
 	while (host->h_addr_list[i])
 	{

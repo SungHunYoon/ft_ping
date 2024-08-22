@@ -7,6 +7,13 @@
 // 4  5  00 0054 4f2b   2 0000  40  01 d217 10.12.250.77  10.12.11.1 
 // ICMP: type 8, code 0, size 64, id 0x1a59, seq 0x0000
 
+// 36 bytes from _gateway (10.0.2.2): Time to live exceeded
+// IP Hdr Dump:
+//  4500 0054 b702 4000 0101 aa8c 0a00 020f 0808 0404 
+// Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data
+//  4  5  00 0054 b702   2 0000  01  01 aa8c 10.0.2.15  8.8.4.4 
+// ICMP: type 8, code 0, size 64, id 0x09a2, seq 0x0000
+
 void	unreachable_dump(struct iphdr ip_pkt, struct icmphdr icmp_pkt, \
 						t_fping ping_pkt, t_info *info)
 {
