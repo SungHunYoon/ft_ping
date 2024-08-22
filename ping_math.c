@@ -17,11 +17,11 @@ void	update_statistics(double x, t_info *info)
 	double	delta;
 	
 	delta = x - info->avg;
-	if (info->min == 0 || info->min > x)
+	if (info->min < 0|| info->min > x)
 		info->min = x;
 	if (info->max < x)
 		info->max = x;
-	info->avg += delta / info->recv_cnt;
+	info->avg += delta / info->total_recv_cnt;
 	info->m2 += delta * (x - info->avg);
-	info->stddev = calculate_stddev(info->m2, info->recv_cnt);
+	info->stddev = calculate_stddev(info->m2, info->total_recv_cnt);
 }

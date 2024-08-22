@@ -60,4 +60,6 @@ void	args_parsing(int argc, char **args, t_info *info)
 	info->pid = getpid();
 	if (getuid() != 0)
 		error_handling("ft_ping: please check root privilege.\n");
+	info->min = -1;
+	info->prev_seq = -1;
 }

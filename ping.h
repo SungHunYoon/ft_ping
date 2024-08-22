@@ -31,12 +31,15 @@ typedef struct s_fping {
 } t_fping;
 
 typedef struct s_info {
+	int		sock;
 	int		opt;
 	int		pid;
 	char	*host;
 	char	*ip;
+	int		prev_seq;
 	size_t	send_cnt;
 	size_t	recv_cnt;
+	size_t	total_recv_cnt;
 	double	min;
 	double	max;
 	double	avg;
@@ -50,8 +53,8 @@ void	ping_process(t_info *info);
 void	ping_finish(t_info *info);
 
 t_ping	make_packet(int seq);
-void	send_packet(int sock, t_ping pkt, t_info *info);
-t_fping	*recv_packet(int sock);
+void	send_packet(t_ping pkt, t_info *info);
+t_fping	*recv_packet(t_info *info);
 void	parse_packet(t_fping pkt, t_info *info);
 
 void	error_handling(char *str);
@@ -60,5 +63,7 @@ char	*int_to_str_ip(uint32_t addr);
 char	*domain_to_ip(char *domain);
 
 void	update_statistics(double x, t_info *info);
+
+void	icmp_error(uint8_t *buf, int len, t_info *info);
 
 #endif
