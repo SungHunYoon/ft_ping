@@ -39,27 +39,36 @@ void	option_parse(int argc, char **args, t_info *info)
 				c++;
 			}
 		}
-		else if (info->host == NULL)
-			info->host = strdup(args[i]);
 		i++;
 	}
 }
 
-void	args_parsing(int argc, char **args, t_info *info)
+int	host_parse(char *str, t_info *info)
 {
-	option_parse(argc, args, info);
-	if (!info->host)
-	{
-		dprintf(2, "ft_ping: missing host operand\n");
-		dprintf(2, "Try 'ft_ping -?' for more information.\n");
-		exit(1);
-	}
-	info->ip = strdup(domain_to_ip(info->host));
-	if (!info->ip)
+	if (strlen(str) >= 2 && str[0] == '-')
+		return (0);
+	free(info->host);
+	free(info->ip);
+	info->host = strdup(str);
+	info->ip = strdup(domain_to_ip(&info->host));
+	if (!info->host || !info->ip)
 		error_handling("ft_ping: malloc failed\n");
-	info->pid = getpid();
-	if (getuid() != 0)
-		error_handling("ft_ping: please check root privilege.\n");
 	info->min = -1;
 	info->prev_seq = -1;
+	info->max = 0;
+	info->avg = 0;
+	info->m2 = 0;
+	info->stddev = 0;
+	info->send_cnt = 0;
+	info->recv_cnt = 0;
+	info->total_recv_cnt = 0;
+	return (1);
+}
+
+void	args_parsing(int argc, char **args, t_info *info)
+{
+	if (getuid() != 0)
+		error_handling("ft_ping: please check root privilege.\n");
+	option_parse(argc, args, info);
+	info->pid = getpid();
 }

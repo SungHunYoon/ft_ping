@@ -36,7 +36,7 @@ void	ping_recv_proc(t_info *info, struct timeval time)
 	{
 		recv_pkt = recv_packet(info);
 		if (!recv_pkt)
-			continue;
+			continue ;
 		parse_packet(*recv_pkt, info);
 		free(recv_pkt);
 	}
@@ -57,13 +57,15 @@ void	ping_process(t_info *info)
 		printf(", id 0x%x = %d", info->pid, info->pid);
 	printf("\n");
 	seq = 0;
+	pkt = make_packet(seq);
+	send_packet(pkt, info);
 	while (!g_stop)
 	{
-		pkt = make_packet(seq);
-		send_packet(pkt, info);
 		gettimeofday(&time, NULL);
 		ping_recv_proc(info, time);
 		seq++;
+		pkt = make_packet(seq);
+		send_packet(pkt, info);
 	}
 }
 

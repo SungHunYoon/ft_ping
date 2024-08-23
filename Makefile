@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g -fsanitize=address
 SRCS = ./ping.c ./ping_packet.c ./ping_parsecmd.c ./ping_process.c ./ping_utils.c ./ping_math.c ./ping_error.c
 OBJS = $(SRCS:.c=.o)
 NAME = ft_ping

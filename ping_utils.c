@@ -20,7 +20,7 @@ double	diff_timeval(struct timeval time)
 		now.tv_sec--;
 	}
 	ret = (now.tv_sec * 1000) + (now.tv_usec / 1000.0);
-	return ret;
+	return (ret);
 }
 
 char	*int_to_str_ip(uint32_t addr)
@@ -30,26 +30,36 @@ char	*int_to_str_ip(uint32_t addr)
 
 	inaddr.s_addr = addr;
 	ret = inet_ntoa(inaddr);
-	return ret;
+	return (ret);
 }
 
-char	*domain_to_ip(char *domain)
+char	*domain_to_ip(char **domain)
 {
 	char			*ret;
 	struct hostent	*host;
 	int				i;
 
-	host = gethostbyname(domain);
+	host = gethostbyname(*domain);
 	if (!host)
 		error_handling("ft_ping: unknown host\n");
 	ret = NULL;
-	free(domain);
-	domain = strdup(host->h_name);
+	free(*domain);
+	*domain = strdup(host->h_name);
 	i = 0;
 	while (host->h_addr_list[i])
 	{
 		ret = inet_ntoa(*(struct in_addr *)host->h_addr_list[i]);
 		break;
 	}
-	return ret;
+	return (ret);
+}
+
+char *ip_to_domain(uint32_t addr)
+{
+	struct hostent	*host;
+
+	host = gethostbyaddr(&addr, sizeof(addr), AF_INET);
+	if (!host)
+		return NULL;
+	return (host->h_name);
 }

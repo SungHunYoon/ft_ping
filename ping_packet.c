@@ -14,7 +14,7 @@ uint16_t	calculate_checksum(uint16_t *data, int len)
 		sum += *(uint8_t *)data;
 	while (sum >> 16)
 		sum = (sum & 0xFFFF) + (sum >> 16);
-	return (uint16_t)(~sum);
+	return ((uint16_t)(~sum));
 }
 
 t_ping	make_packet(int seq)
@@ -35,7 +35,7 @@ t_ping	make_packet(int seq)
 		i++;
 	}
 	pkt.icmp.checksum = calculate_checksum((uint16_t *)&pkt, sizeof(pkt));
-	return pkt;
+	return (pkt);
 }
 
 void	send_packet(t_ping pkt, t_info *info)
@@ -48,10 +48,8 @@ void	send_packet(t_ping pkt, t_info *info)
 	dest_addr.sin_addr.s_addr = inet_addr(info->ip);
 	len = sendto(info->sock, &pkt, sizeof(pkt), 0,\
 		 (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-	if (len == -1) {
-		dprintf(2, "errno : %d\n", errno);
+	if (len == -1)
 		error_handling("ft_ping: sendto failed\n");
-	}
 	info->send_cnt++;
 }
 
@@ -67,7 +65,7 @@ t_fping	*recv_packet(t_info *info)
 	len = recvfrom(info->sock, buf, 1024, MSG_DONTWAIT,\
 		 (struct sockaddr *)&src_addr, &src_len);
 	if (errno == EAGAIN && len == -1)
-		return NULL;
+		return (NULL);
 	else if (len == -1)
 		error_handling("ft_ping: recvfrom failed\n");
 	recv_pkt = (t_fping *)malloc(sizeof(t_fping));
@@ -78,10 +76,10 @@ t_fping	*recv_packet(t_info *info)
 	if (recv_pkt->ping.icmp.type != 0)
 	{
 		free(recv_pkt);
-		icmp_error(buf, len, info);
-		return NULL;
+		icmp_error(buf, info);
+		return (NULL);
 	}
-	return recv_pkt;
+	return (recv_pkt);
 }
 
 void	parse_packet(t_fping pkt, t_info *info)
