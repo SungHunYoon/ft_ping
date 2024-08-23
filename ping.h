@@ -17,16 +17,14 @@
 #include <errno.h>
 #include <math.h>
 
-#define SWAP16(x) (((x >> 8) & 0xFF) | ((x << 8) & 0xFF00))
-
 typedef struct s_ping {
-	struct icmphdr	icmp;
+	struct icmp		icmp;
 	struct timeval	time;
 	char			dummy[40];
 } t_ping;
 
 typedef struct s_fping {
-	struct iphdr	ip;
+	struct ip		ip;
 	struct s_ping	ping;
 } t_fping;
 
@@ -60,9 +58,8 @@ void	parse_packet(t_fping pkt, t_info *info);
 
 void	error_handling(char *str);
 double	diff_timeval(struct timeval time);
-char	*int_to_str_ip(uint32_t addr);
 char	*domain_to_ip(char **domain);
-char	*ip_to_domain(uint32_t addr);
+char	*ip_to_domain(struct in_addr addr);
 
 void	update_statistics(double x, t_info *info);
 

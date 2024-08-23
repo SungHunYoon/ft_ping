@@ -1,6 +1,6 @@
 #include "ping.h"
 
-uint16_t	calculate_checksum(uint16_t *data, int len)
+static uint16_t	calculate_checksum(uint16_t *data, int len)
 {
 	uint32_t	sum;
 
@@ -23,10 +23,10 @@ t_ping	make_packet(int seq)
 	int		i;
 
 	memset(&pkt, 0, sizeof(pkt));
-	pkt.icmp.type = ICMP_ECHO;
-	pkt.icmp.code = 0;
-	pkt.icmp.un.echo.id = SWAP16(getpid());
-	pkt.icmp.un.echo.sequence = SWAP16(seq);
+	pkt.icmp.icmp_type = ICMP_ECHO;
+	pkt.icmp.icmp_code = 0;
+	pkt.icmp.icmp_id = htons(getpid());
+	pkt.icmp.icmp_seq = htons(seq);
 	gettimeofday(&pkt.time, NULL);
 	i = 0;
 	while (i < 40)
@@ -34,7 +34,7 @@ t_ping	make_packet(int seq)
 		pkt.dummy[i] = i;
 		i++;
 	}
-	pkt.icmp.checksum = calculate_checksum((uint16_t *)&pkt, sizeof(pkt));
+	pkt.icmp.icmp_cksum = calculate_checksum((uint16_t *)&pkt, sizeof(pkt));
 	return (pkt);
 }
 
@@ -73,7 +73,7 @@ t_fping	*recv_packet(t_info *info)
 		error_handling("ft_ping: malloc failed\n");
 	memcpy(&recv_pkt->ip, buf, sizeof(recv_pkt->ip));
 	memcpy(&recv_pkt->ping, &buf[20], sizeof(recv_pkt->ping));
-	if (recv_pkt->ping.icmp.type != 0)
+	if (recv_pkt->ping.icmp.icmp_type != ICMP_ECHOREPLY)
 	{
 		free(recv_pkt);
 		icmp_error(buf, info);
@@ -86,19 +86,19 @@ void	parse_packet(t_fping pkt, t_info *info)
 {
 	double	diff_time;
 
-	if (pkt.ping.icmp.un.echo.id != SWAP16(info->pid))
+	if (pkt.ping.icmp.icmp_id != ntohs(info->pid))
 		return;
-	if (info->prev_seq != SWAP16(pkt.ping.icmp.un.echo.sequence))
+	if (info->prev_seq != ntohs(pkt.ping.icmp.icmp_seq))
 		info->recv_cnt++;
 	diff_time = diff_timeval(pkt.ping.time);
-	printf("%ld byte from ", SWAP16(pkt.ip.tot_len) - sizeof(pkt.ip));
-	printf("%s: ", int_to_str_ip(pkt.ip.saddr));
-	printf("icmp_seq: %d ", SWAP16(pkt.ping.icmp.un.echo.sequence));
-	printf("ttl=%d time=%.3lf ms", pkt.ip.ttl, diff_time);
-	if (info->prev_seq == SWAP16(pkt.ping.icmp.un.echo.sequence))
+	printf("%ld byte from ", ntohs(pkt.ip.ip_len) - sizeof(pkt.ip));
+	printf("%s: ", inet_ntoa(pkt.ip.ip_src));
+	printf("icmp_seq: %d ", ntohs(pkt.ping.icmp.icmp_seq));
+	printf("ttl=%d time=%.3lf ms", pkt.ip.ip_ttl, diff_time);
+	if (info->prev_seq == ntohs(pkt.ping.icmp.icmp_seq))
 		printf(" (DUP!)");
 	printf("\n");
-	info->prev_seq = SWAP16(pkt.ping.icmp.un.echo.sequence);
+	info->prev_seq = ntohs(pkt.ping.icmp.icmp_seq);
 	info->total_recv_cnt++;
 	update_statistics(diff_time, info);
 }

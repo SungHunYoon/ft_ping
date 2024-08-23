@@ -1,6 +1,6 @@
 #include "ping.h"
 
-void	usage_error(void)
+static void	usage_error(void)
 {
 	dprintf(2, "ft_ping: missing host operand\n");
 	dprintf(2, "Try 'ft_ping -?' for more information.\n");

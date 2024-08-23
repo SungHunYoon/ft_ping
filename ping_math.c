@@ -1,13 +1,13 @@
 #include "ping.h"
 
-double	calculate_variance(double m2, int n)
+static double	calculate_variance(double m2, int n)
 {
 	if (n < 2)
 		return 0.0;
 	return (m2 / (n - 1));
 }
 
-double	calculate_stddev(double m2, int n)
+static double	calculate_stddev(double m2, int n)
 {
 	return (sqrt(calculate_variance(m2, n)));
 }

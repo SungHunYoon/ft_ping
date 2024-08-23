@@ -1,37 +1,24 @@
 #include "ping.h"
 
-// 92 bytes from debian (10.12.250.77): Destination Host Unreachable
-// IP Hdr Dump:
-//  4500 0054 4da5 4000 4001 d39d 0a0c fa4d 0a0c 0b01 
-// Vr HL TOS  Len   ID Flg  off TTL Pro  cks      Src      Dst     Data
-//  4  5  00 0054 4da5   2 0000  40  01 d39d 10.12.250.77  10.12.11.1 
-// ICMP: type 8, code 0, size 64, id 0x0dde, seq 0x0003
-
-void	print_pkt_info(t_fping pkt)
+static void	print_pkt_info(t_fping pkt)
 {
-	char	*src;
-	char	*dst;
-
-	src = strdup(int_to_str_ip(pkt.ip.saddr));
-	dst = strdup(int_to_str_ip(pkt.ip.daddr));
 	printf("\nVr HL TOS  LEN   ID Flg  Off TTL ");
-	printf("Pro  cks      Src      Dst     Data\n");
-	printf("%2d %2d  %02x %04x %04x %3d %04x  %02x  %02x %04x %s  %s\n",
-		pkt.ip.version, pkt.ip.ihl, pkt.ip.tos, SWAP16(pkt.ip.tot_len),
-		pkt.ip.id, (pkt.ip.frag_off & 0xE0) >> 5, 
-		SWAP16(pkt.ip.frag_off) & 0x1F,
-		pkt.ip.ttl, pkt.ip.protocol, SWAP16(pkt.ip.check),
-		src, dst);
+	printf("Pro  cks      Src\tDst\tData\n");
+	printf("%2d %2d  %02x %04x %04x %3d %04x  %02x  %02x %04x\n",
+		pkt.ip.ip_v, pkt.ip.ip_hl, pkt.ip.ip_tos, ntohs(pkt.ip.ip_len),
+		ntohs(pkt.ip.ip_id), (pkt.ip.ip_off & 0xE000) >> 13, 
+		ntohs(pkt.ip.ip_off) & 0x1FFF,
+		pkt.ip.ip_ttl, pkt.ip.ip_p, ntohs(pkt.ip.ip_sum));
+	printf(" %s ", inet_ntoa(pkt.ip.ip_src));
+	printf(" %s ", inet_ntoa(pkt.ip.ip_dst));
 	printf("ICMP: type %d, code %d, size %zu, id 0x%04x, seq 0x%04x\n",
-		pkt.ping.icmp.type, pkt.ping.icmp.code, 
+		pkt.ping.icmp.icmp_type, pkt.ping.icmp.icmp_code, 
 		sizeof(pkt.ping), 
-		SWAP16(pkt.ping.icmp.un.echo.id), 
-		SWAP16(pkt.ping.icmp.un.echo.sequence));
-	free(src);
-	free(dst);
+		ntohs(pkt.ping.icmp.icmp_id), 
+		ntohs(pkt.ping.icmp.icmp_seq));
 }
 
-void	common_dump(t_fping pkt)
+static void	common_dump(t_fping pkt)
 {
 	uint8_t	*raw;
 	int		i;
@@ -47,39 +34,49 @@ void	common_dump(t_fping pkt)
 	print_pkt_info(pkt);
 }
 
-void	unreachable_dump(struct iphdr ip_pkt, struct icmphdr icmp_pkt, \
+static void	unreachable_dump(struct ip ip_pkt, struct icmp icmp_pkt, \
 						t_fping ping_pkt, t_info *info)
 {
-	if (SWAP16(ping_pkt.ping.icmp.un.echo.id) != info->pid)
+	if (ntohs(ping_pkt.ping.icmp.icmp_id) != info->pid)
 		return;
-	printf("%lu bytes from %s (%s): ", 
-		SWAP16(ip_pkt.tot_len) - sizeof(struct iphdr),
-		ip_to_domain(ip_pkt.daddr), int_to_str_ip(ip_pkt.daddr));
-	if (icmp_pkt.code == 1)
+	printf("%lu bytes from ", ntohs(ip_pkt.ip_len) - sizeof(struct ip));
+	if (!ip_to_domain(ip_pkt.ip_dst))
+		printf("%s: ", inet_ntoa(ip_pkt.ip_dst));
+	else
+	{
+		printf("%s (%s): ", ip_to_domain(ip_pkt.ip_dst),
+			inet_ntoa(ip_pkt.ip_dst));
+	}
+	if (icmp_pkt.icmp_code == ICMP_UNREACH_HOST)
 		printf("Destination Host Unreachable");
-	else if (icmp_pkt.code == 3)
+	else if (icmp_pkt.icmp_code == ICMP_UNREACH_PORT)
 		printf("Destination Port Unreachable");
-	else if (icmp_pkt.code == 4)
-		printf("Fragmentation Required but DF bit is set");
-	else if (icmp_pkt.code == 13)
-		printf("Forbidden");
+	else if (icmp_pkt.icmp_code == ICMP_UNREACH_NEEDFRAG)
+		printf("Fragmentation needed and DF set");
+	else if (icmp_pkt.icmp_code == ICMP_UNREACH_FILTER_PROHIB)
+		printf("Packet Filtered");
 	printf("\n");
 	if (info->opt)
 		common_dump(ping_pkt);
 }
 
-void	timeexceed_dump(struct iphdr ip_pkt, struct icmphdr icmp_pkt, \
+static void	timeexceed_dump(struct ip ip_pkt, struct icmp icmp_pkt, \
 					t_fping ping_pkt, t_info *info)
 {
-	if (SWAP16(ping_pkt.ping.icmp.un.echo.id) != info->pid)
+	if (ntohs(ping_pkt.ping.icmp.icmp_id) != info->pid)
 		return;
-	printf("%lu bytes from %s (%s): ",
-		SWAP16(ip_pkt.tot_len) - sizeof(struct iphdr),
-		ip_to_domain(ip_pkt.daddr), int_to_str_ip(ip_pkt.daddr));
-	if (icmp_pkt.code == 0)
-		printf("Time to Live Exceeded");
-	else if (icmp_pkt.code == 1)
-		printf("Fragment Reassembly Time Exceeded");
+	printf("%lu bytes from ", ntohs(ip_pkt.ip_len) - sizeof(struct ip));
+	if (!ip_to_domain(ip_pkt.ip_dst))
+		printf("%s: ", inet_ntoa(ip_pkt.ip_dst));
+	else
+	{
+		printf("%s (%s): ", ip_to_domain(ip_pkt.ip_dst),
+			inet_ntoa(ip_pkt.ip_dst));
+	}
+	if (icmp_pkt.icmp_code == ICMP_TIMXCEED_INTRANS)
+		printf("Time to live exceeded");
+	else if (icmp_pkt.icmp_code == ICMP_TIMXCEED_REASS)
+		printf("Frag reassembly time exceeded");
 	printf("\n");
 	if (info->opt)
 		common_dump(ping_pkt);
@@ -87,20 +84,20 @@ void	timeexceed_dump(struct iphdr ip_pkt, struct icmphdr icmp_pkt, \
 
 void	icmp_error(uint8_t *buf, t_info *info)
 {
-	struct iphdr	ip_pkt;
-	struct icmphdr	icmp_pkt;
-	t_fping			ping_pkt;
+	struct ip	ip_pkt;
+	struct icmp	icmp_pkt;
+	t_fping		ping_pkt;
 
-	memcpy(&ip_pkt, buf, sizeof(struct iphdr));
-	memcpy(&icmp_pkt, &buf[sizeof(struct iphdr)], sizeof(struct icmphdr));
+	memcpy(&ip_pkt, buf, sizeof(struct ip));
+	memcpy(&icmp_pkt, &buf[sizeof(struct ip)], sizeof(struct icmp));
 	memcpy(&ping_pkt.ip, \
-		&buf[sizeof(struct iphdr) + sizeof(struct icmphdr)], \
-		sizeof(struct iphdr));
+		&buf[sizeof(struct ip) + sizeof(struct icmp)], \
+		sizeof(struct ip));
 	memcpy(&ping_pkt.ping, \
-		&buf[sizeof(struct iphdr) * 2 + sizeof(struct icmphdr)], \
+		&buf[sizeof(struct ip) * 2 + sizeof(struct icmp)], \
 		sizeof(t_ping));
-	if (icmp_pkt.type == 3)
+	if (icmp_pkt.icmp_type == ICMP_UNREACH)
 		unreachable_dump(ip_pkt, icmp_pkt, ping_pkt, info);
-	else if (icmp_pkt.type == 11)
+	else if (icmp_pkt.icmp_type == ICMP_TIMXCEED)
 		timeexceed_dump(ip_pkt, icmp_pkt, ping_pkt, info);
 }

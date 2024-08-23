@@ -1,6 +1,6 @@
 #include "ping.h"
 
-void	help_message(void)
+static void	help_message(void)
 {
 	printf("Usage: ft_ping [OPTION...] HOST ...\n");
 	printf("Send ICMP ECHO_REQUEST packets to network hosts.\n\n");
@@ -10,14 +10,14 @@ void	help_message(void)
 	exit(0);
 }
 
-void	invalid_option(char c)
+static void	invalid_option(char c)
 {
 	printf("ft_ping: invalid option -- '%c'\n", c);
 	printf("Try 'ft_ping -?' for more information.\n");
 	exit(1);
 }
 
-void	option_parse(int argc, char **args, t_info *info)
+static void	option_parse(int argc, char **args, t_info *info)
 {
 	int		i;
 	char	*c;
@@ -53,15 +53,16 @@ int	host_parse(char *str, t_info *info)
 	info->ip = strdup(domain_to_ip(&info->host));
 	if (!info->host || !info->ip)
 		error_handling("ft_ping: malloc failed\n");
-	info->min = -1;
+	
 	info->prev_seq = -1;
+	info->send_cnt = 0;
+	info->recv_cnt = 0;
+	info->total_recv_cnt = 0;
+	info->min = -1;
 	info->max = 0;
 	info->avg = 0;
 	info->m2 = 0;
 	info->stddev = 0;
-	info->send_cnt = 0;
-	info->recv_cnt = 0;
-	info->total_recv_cnt = 0;
 	return (1);
 }
 

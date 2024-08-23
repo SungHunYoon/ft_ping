@@ -2,13 +2,13 @@
 
 volatile sig_atomic_t g_stop;
 
-void	sigint_handler(int signo)
+static void	sigint_handler(int signo)
 {
 	(void)signo;
 	g_stop = 1;
 }
 
-void	raw_socket_open(t_info *info)
+static void	raw_socket_open(t_info *info)
 {
 	int			broadcast;
 	socklen_t	optlen;
@@ -28,7 +28,7 @@ void	raw_socket_open(t_info *info)
 		error_handling("ft_ping: set socket opt broadcast failed\n");
 }
 
-void	ping_recv_proc(t_info *info, struct timeval time)
+static void	ping_recv_proc(t_info *info, struct timeval time)
 {
 	t_fping	*recv_pkt;
 
@@ -49,6 +49,7 @@ void	ping_process(t_info *info)
 	struct timeval	time;
 	int				seq;
 
+	printf("pkt : %ld, icmp : %ld\n", sizeof(pkt), sizeof(pkt.icmp));
 	signal(SIGINT, sigint_handler);
 	raw_socket_open(info);
 	printf("PING %s (%s): ", info->host, info->ip);
@@ -57,15 +58,13 @@ void	ping_process(t_info *info)
 		printf(", id 0x%x = %d", info->pid, info->pid);
 	printf("\n");
 	seq = 0;
-	pkt = make_packet(seq);
-	send_packet(pkt, info);
-	while (!g_stop)
+	while (!g_stop || seq == 0)
 	{
+		pkt = make_packet(seq);
+		send_packet(pkt, info);
 		gettimeofday(&time, NULL);
 		ping_recv_proc(info, time);
 		seq++;
-		pkt = make_packet(seq);
-		send_packet(pkt, info);
 	}
 }
 

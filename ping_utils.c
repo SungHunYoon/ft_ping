@@ -23,16 +23,6 @@ double	diff_timeval(struct timeval time)
 	return (ret);
 }
 
-char	*int_to_str_ip(uint32_t addr)
-{
-	char			*ret;
-	struct in_addr	inaddr;
-
-	inaddr.s_addr = addr;
-	ret = inet_ntoa(inaddr);
-	return (ret);
-}
-
 char	*domain_to_ip(char **domain)
 {
 	char			*ret;
@@ -54,7 +44,7 @@ char	*domain_to_ip(char **domain)
 	return (ret);
 }
 
-char *ip_to_domain(uint32_t addr)
+char *ip_to_domain(struct in_addr addr)
 {
 	struct hostent	*host;
 
