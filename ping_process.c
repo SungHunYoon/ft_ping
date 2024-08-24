@@ -42,15 +42,23 @@ static void	raw_socket_open(t_info *info)
 
 static void	ping_recv_proc(t_info *info, struct timeval time)
 {
-	t_fping	*recv_pkt;
+	t_fping			recv_pkt;
+	struct timeval	t;
+	double			diff;
+	size_t			tmp;
 
-	while (diff_timeval(time) <= 1000.0 && !g_stop)
+	diff = diff_timeval(time);
+	while (diff <= 1000.0 && !g_stop)
 	{
-		recv_pkt = recv_packet(info);
-		if (!recv_pkt)
-			continue ;
-		parse_packet(*recv_pkt, info);
-		free(recv_pkt);
+		tmp = 1000000 - (size_t)(diff * 1000);
+		t.tv_sec = tmp / 1000000;
+		t.tv_usec = tmp % 1000000;
+		if (setsockopt(info->sock, SOL_SOCKET, SO_RCVTIMEO, \
+			&t, sizeof(t)) < 0)
+			error_handling("ft_ping: set socket opt rcvtimeo failed\n");
+		if (recv_packet(&recv_pkt, info) == 0)
+			parse_packet(recv_pkt, info);
+		diff = diff_timeval(time);
 	}
 }
 
@@ -60,11 +68,10 @@ void	ping_process(t_info *info)
 	struct timeval	time;
 	int				seq;
 
-	printf("pkt : %ld, icmp : %ld\n", sizeof(pkt), sizeof(pkt.icmp));
 	signal(SIGINT, sigint_handler);
 	raw_socket_open(info);
 	printf("PING %s (%s): ", info->host, info->ip);
-	printf("%ld data bytes", sizeof(pkt) - sizeof(pkt.icmp));
+	printf("%ld data bytes", sizeof(pkt) - 8);
 	if (info->opt == 1)
 		printf(", id 0x%x = %d", info->pid, info->pid);
 	printf("\n");

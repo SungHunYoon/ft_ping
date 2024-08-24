@@ -30,14 +30,19 @@
 # include <math.h>
 
 typedef struct s_ping {
-	struct icmp		icmp;
+	uint8_t			icmp_type;
+	uint8_t			icmp_code;
+	uint16_t		icmp_cksum;
+	uint16_t		id;
+	uint16_t		seq;
 	struct timeval	time;
 	char			dummy[40];
 }	t_ping;
 
 typedef struct s_fping {
-	struct ip		ip;
-	struct s_ping	ping;
+	struct ip	ip;
+	struct icmp	icmp;
+	t_ping		ping;
 }	t_fping;
 
 typedef struct s_info {
@@ -65,7 +70,7 @@ void	ping_finish(t_info *info);
 
 t_ping	make_packet(int seq);
 void	send_packet(t_ping pkt, t_info *info);
-t_fping	*recv_packet(t_info *info);
+int		recv_packet(t_fping *pkt, t_info *info);
 void	parse_packet(t_fping pkt, t_info *info);
 
 void	error_handling(char *str);
