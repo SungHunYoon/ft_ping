@@ -6,7 +6,7 @@
 /*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 13:48:31 by sungyoon          #+#    #+#             */
-/*   Updated: 2024/08/24 13:50:27 by sungyoon         ###   ########.fr       */
+/*   Updated: 2024/08/24 19:16:50 by sungyoon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ void	send_packet(t_ping pkt, t_info *info)
 	dest_addr.sin_family = AF_INET;
 	dest_addr.sin_addr.s_addr = inet_addr(info->ip);
 	len = sendto(info->sock, &pkt, sizeof(pkt), 0,
-		(struct sockaddr *)&dest_addr, sizeof(dest_addr));
+			(struct sockaddr *)&dest_addr, sizeof(dest_addr));
 	if (len == -1)
 		error_handling("ft_ping: sendto failed\n");
 	info->send_cnt++;
@@ -74,7 +74,7 @@ int	recv_packet(t_fping *pkt, t_info *info)
 
 	src_len = sizeof(src_addr);
 	len = recvfrom(info->sock, buf, 1024, 0,
-		(struct sockaddr *)&src_addr, &src_len);
+			(struct sockaddr *)&src_addr, &src_len);
 	if ((errno == EAGAIN || errno == EINTR) && len == -1)
 		return (-1);
 	else if (len == -1)

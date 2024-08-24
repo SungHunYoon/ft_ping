@@ -6,7 +6,7 @@
 /*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/08/24 13:48:34 by sungyoon          #+#    #+#             */
-/*   Updated: 2024/08/24 13:54:03 by sungyoon         ###   ########.fr       */
+/*   Updated: 2024/08/24 19:17:32 by sungyoon         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static void	raw_socket_open(t_info *info)
 	broadcast = 1;
 	optlen = sizeof(broadcast);
 	if (setsockopt(info->sock, SOL_SOCKET, SO_BROADCAST,
-				&broadcast, optlen) < 0)
+			&broadcast, optlen) < 0)
 		error_handling("ft_ping: set socket opt broadcast failed\n");
 	ttl = 64;
 	optlen = sizeof(ttl);
@@ -54,7 +54,7 @@ static void	ping_recv_proc(t_info *info, struct timeval time)
 		t.tv_sec = tmp / 1000000;
 		t.tv_usec = tmp % 1000000;
 		if (setsockopt(info->sock, SOL_SOCKET, SO_RCVTIMEO,
-			&t, sizeof(t)) < 0)
+				&t, sizeof(t)) < 0)
 			error_handling("ft_ping: set socket opt rcvtimeo failed\n");
 		if (recv_packet(&recv_pkt, info) == 0)
 			parse_packet(recv_pkt, info);
