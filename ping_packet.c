@@ -58,7 +58,7 @@ void	send_packet(t_ping pkt, t_info *info)
 	memset(&dest_addr, 0, sizeof(dest_addr));
 	dest_addr.sin_family = AF_INET;
 	dest_addr.sin_addr.s_addr = inet_addr(info->ip);
-	len = sendto(info->sock, &pkt, sizeof(pkt), 0, \
+	len = sendto(info->sock, &pkt, sizeof(pkt), 0,
 		(struct sockaddr *)&dest_addr, sizeof(dest_addr));
 	if (len == -1)
 		error_handling("ft_ping: sendto failed\n");
@@ -73,7 +73,7 @@ int	recv_packet(t_fping *pkt, t_info *info)
 	int					len;
 
 	src_len = sizeof(src_addr);
-	len = recvfrom(info->sock, buf, 1024, 0, \
+	len = recvfrom(info->sock, buf, 1024, 0,
 		(struct sockaddr *)&src_addr, &src_len);
 	if ((errno == EAGAIN || errno == EINTR) && len == -1)
 		return (-1);

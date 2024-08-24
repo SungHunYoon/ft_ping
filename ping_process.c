@@ -31,7 +31,7 @@ static void	raw_socket_open(t_info *info)
 		error_handling("ft_ping: create socket failed\n");
 	broadcast = 1;
 	optlen = sizeof(broadcast);
-	if (setsockopt(info->sock, SOL_SOCKET, SO_BROADCAST, \
+	if (setsockopt(info->sock, SOL_SOCKET, SO_BROADCAST,
 				&broadcast, optlen) < 0)
 		error_handling("ft_ping: set socket opt broadcast failed\n");
 	ttl = 64;
@@ -53,7 +53,7 @@ static void	ping_recv_proc(t_info *info, struct timeval time)
 		tmp = 1000000 - (size_t)(diff * 1000);
 		t.tv_sec = tmp / 1000000;
 		t.tv_usec = tmp % 1000000;
-		if (setsockopt(info->sock, SOL_SOCKET, SO_RCVTIMEO, \
+		if (setsockopt(info->sock, SOL_SOCKET, SO_RCVTIMEO,
 			&t, sizeof(t)) < 0)
 			error_handling("ft_ping: set socket opt rcvtimeo failed\n");
 		if (recv_packet(&recv_pkt, info) == 0)
@@ -94,12 +94,12 @@ void	ping_finish(t_info *info)
 	printf("%zu packets received, ", info->recv_cnt);
 	if (info->total_recv_cnt - info->recv_cnt)
 		printf("+%zu duplicates, ", info->total_recv_cnt - info->recv_cnt);
-	printf("%d%% packet loss\n", \
+	printf("%d%% packet loss\n",
 		(int)((info->send_cnt - info->recv_cnt) * 100 / info->send_cnt));
 	if (info->recv_cnt)
 	{
 		printf("round-trip min/avg/max/stddev = ");
-		printf("%.3lf/%.3lf/%.3lf/%.3lf ms\n", \
+		printf("%.3lf/%.3lf/%.3lf/%.3lf ms\n",
 			info->min, info->avg, info->max, info->stddev);
 	}
 }

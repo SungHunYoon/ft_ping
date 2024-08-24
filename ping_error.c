@@ -101,8 +101,8 @@ void	icmp_error(uint8_t *buf, t_info *info)
 
 	memcpy(&pkt.ip, buf, sizeof(struct ip));
 	memcpy(&pkt.icmp, &buf[sizeof(struct ip)], sizeof(struct icmp));
-	memcpy(&pkt.ping, \
-		&buf[sizeof(struct ip) + sizeof(struct icmp)], \
+	memcpy(&pkt.ping,
+		&buf[sizeof(struct ip) + sizeof(struct icmp)],
 		sizeof(t_ping));
 	if (pkt.icmp.icmp_type == ICMP_UNREACH)
 		unreachable_dump(pkt, info);
