@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping_parsecmd.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 13:48:19 by sungyoon          #+#    #+#             */
+/*   Updated: 2024/08/24 13:49:13 by sungyoon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ping.h"
 
 static void	help_message(void)
@@ -53,7 +65,6 @@ int	host_parse(char *str, t_info *info)
 	info->ip = strdup(domain_to_ip(&info->host));
 	if (!info->host || !info->ip)
 		error_handling("ft_ping: malloc failed\n");
-	
 	info->prev_seq = -1;
 	info->send_cnt = 0;
 	info->recv_cnt = 0;

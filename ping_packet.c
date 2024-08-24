@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping_packet.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 13:48:31 by sungyoon          #+#    #+#             */
+/*   Updated: 2024/08/24 13:50:27 by sungyoon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ping.h"
 
 static uint16_t	calculate_checksum(uint16_t *data, int len)
@@ -46,8 +58,8 @@ void	send_packet(t_ping pkt, t_info *info)
 	memset(&dest_addr, 0, sizeof(dest_addr));
 	dest_addr.sin_family = AF_INET;
 	dest_addr.sin_addr.s_addr = inet_addr(info->ip);
-	len = sendto(info->sock, &pkt, sizeof(pkt), 0,\
-		 (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+	len = sendto(info->sock, &pkt, sizeof(pkt), 0, \
+		(struct sockaddr *)&dest_addr, sizeof(dest_addr));
 	if (len == -1)
 		error_handling("ft_ping: sendto failed\n");
 	info->send_cnt++;
@@ -59,11 +71,11 @@ t_fping	*recv_packet(t_info *info)
 	struct sockaddr_in	src_addr;
 	socklen_t			src_len;
 	uint8_t				buf[1024];
-	int 				len;
+	int					len;
 
 	src_len = sizeof(src_addr);
-	len = recvfrom(info->sock, buf, 1024, MSG_DONTWAIT,\
-		 (struct sockaddr *)&src_addr, &src_len);
+	len = recvfrom(info->sock, buf, 1024, MSG_DONTWAIT, \
+		(struct sockaddr *)&src_addr, &src_len);
 	if (errno == EAGAIN && len == -1)
 		return (NULL);
 	else if (len == -1)
@@ -87,7 +99,7 @@ void	parse_packet(t_fping pkt, t_info *info)
 	double	diff_time;
 
 	if (pkt.ping.icmp.icmp_id != ntohs(info->pid))
-		return;
+		return ;
 	if (info->prev_seq != ntohs(pkt.ping.icmp.icmp_seq))
 		info->recv_cnt++;
 	diff_time = diff_timeval(pkt.ping.time);

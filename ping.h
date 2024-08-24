@@ -1,32 +1,44 @@
-#ifndef _PING_H_
-#define _PING_H_
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping.h                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 13:48:46 by sungyoon          #+#    #+#             */
+/*   Updated: 2024/08/24 13:55:19 by sungyoon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <signal.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-#include <netinet/ip_icmp.h>
-#include <netdb.h>
-#include <errno.h>
-#include <math.h>
+#ifndef PING_H
+# define PING_H
+
+# include <unistd.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <signal.h>
+# include <sys/time.h>
+# include <sys/socket.h>
+# include <sys/types.h>
+# include <arpa/inet.h>
+# include <netinet/in.h>
+# include <netinet/ip.h>
+# include <netinet/ip_icmp.h>
+# include <netdb.h>
+# include <errno.h>
+# include <math.h>
 
 typedef struct s_ping {
 	struct icmp		icmp;
 	struct timeval	time;
 	char			dummy[40];
-} t_ping;
+}	t_ping;
 
 typedef struct s_fping {
 	struct ip		ip;
 	struct s_ping	ping;
-} t_fping;
+}	t_fping;
 
 typedef struct s_info {
 	int		sock;
@@ -43,7 +55,7 @@ typedef struct s_info {
 	double	avg;
 	double	m2;
 	double	stddev;
-} t_info;
+}	t_info;
 
 int		host_parse(char *str, t_info *info);
 void	args_parsing(int argc, char **args, t_info *info);

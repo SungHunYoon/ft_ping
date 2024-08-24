@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping_error.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 13:48:24 by sungyoon          #+#    #+#             */
+/*   Updated: 2024/08/24 13:52:08 by sungyoon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ping.h"
 
 static void	print_pkt_info(t_fping pkt)
@@ -6,15 +18,15 @@ static void	print_pkt_info(t_fping pkt)
 	printf("Pro  cks      Src\tDst\tData\n");
 	printf("%2d %2d  %02x %04x %04x %3d %04x  %02x  %02x %04x\n",
 		pkt.ip.ip_v, pkt.ip.ip_hl, pkt.ip.ip_tos, ntohs(pkt.ip.ip_len),
-		ntohs(pkt.ip.ip_id), (pkt.ip.ip_off & 0xE000) >> 13, 
+		ntohs(pkt.ip.ip_id), (pkt.ip.ip_off & 0xE000) >> 13,
 		ntohs(pkt.ip.ip_off) & 0x1FFF,
 		pkt.ip.ip_ttl, pkt.ip.ip_p, ntohs(pkt.ip.ip_sum));
 	printf(" %s ", inet_ntoa(pkt.ip.ip_src));
 	printf(" %s ", inet_ntoa(pkt.ip.ip_dst));
 	printf("ICMP: type %d, code %d, size %zu, id 0x%04x, seq 0x%04x\n",
-		pkt.ping.icmp.icmp_type, pkt.ping.icmp.icmp_code, 
-		sizeof(pkt.ping), 
-		ntohs(pkt.ping.icmp.icmp_id), 
+		pkt.ping.icmp.icmp_type, pkt.ping.icmp.icmp_code,
+		sizeof(pkt.ping),
+		ntohs(pkt.ping.icmp.icmp_id),
 		ntohs(pkt.ping.icmp.icmp_seq));
 }
 
@@ -38,7 +50,7 @@ static void	unreachable_dump(struct ip ip_pkt, struct icmp icmp_pkt, \
 						t_fping ping_pkt, t_info *info)
 {
 	if (ntohs(ping_pkt.ping.icmp.icmp_id) != info->pid)
-		return;
+		return ;
 	printf("%lu bytes from ", ntohs(ip_pkt.ip_len) - sizeof(struct ip));
 	if (!ip_to_domain(ip_pkt.ip_dst))
 		printf("%s: ", inet_ntoa(ip_pkt.ip_dst));
@@ -64,7 +76,7 @@ static void	timeexceed_dump(struct ip ip_pkt, struct icmp icmp_pkt, \
 					t_fping ping_pkt, t_info *info)
 {
 	if (ntohs(ping_pkt.ping.icmp.icmp_id) != info->pid)
-		return;
+		return ;
 	printf("%lu bytes from ", ntohs(ip_pkt.ip_len) - sizeof(struct ip));
 	if (!ip_to_domain(ip_pkt.ip_dst))
 		printf("%s: ", inet_ntoa(ip_pkt.ip_dst));

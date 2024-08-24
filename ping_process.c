@@ -1,6 +1,18 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping_process.c                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 13:48:34 by sungyoon          #+#    #+#             */
+/*   Updated: 2024/08/24 13:54:03 by sungyoon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ping.h"
 
-volatile sig_atomic_t g_stop;
+volatile sig_atomic_t	g_stop;
 
 static void	sigint_handler(int signo)
 {
@@ -40,7 +52,6 @@ static void	ping_recv_proc(t_info *info, struct timeval time)
 		parse_packet(*recv_pkt, info);
 		free(recv_pkt);
 	}
-	return;
 }
 
 void	ping_process(t_info *info)

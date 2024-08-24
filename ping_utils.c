@@ -1,8 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ping_utils.c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sungyoon <sungyoon@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/08/24 13:48:12 by sungyoon          #+#    #+#             */
+/*   Updated: 2024/08/24 13:51:26 by sungyoon         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ping.h"
 
 void	error_handling(char *str)
 {
-	dprintf(2, str);
+	dprintf(2, "%s", str);
 	exit(1);
 }
 
@@ -10,7 +22,7 @@ double	diff_timeval(struct timeval time)
 {
 	double			ret;
 	struct timeval	now;
-	
+
 	gettimeofday(&now, NULL);
 	now.tv_sec -= time.tv_sec;
 	now.tv_usec -= time.tv_usec;
@@ -39,17 +51,17 @@ char	*domain_to_ip(char **domain)
 	while (host->h_addr_list[i])
 	{
 		ret = inet_ntoa(*(struct in_addr *)host->h_addr_list[i]);
-		break;
+		break ;
 	}
 	return (ret);
 }
 
-char *ip_to_domain(struct in_addr addr)
+char	*ip_to_domain(struct in_addr addr)
 {
 	struct hostent	*host;
 
 	host = gethostbyaddr(&addr, sizeof(addr), AF_INET);
 	if (!host)
-		return NULL;
+		return (NULL);
 	return (host->h_name);
 }
