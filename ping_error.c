@@ -54,11 +54,11 @@ static void	unreachable_dump(t_fping pkt, t_info *info)
 	if (ntohs(pkt.ping.id) != info->pid)
 		return ;
 	printf("%lu bytes from ", ntohs(pkt.ip.ip_len) - sizeof(struct ip));
-	if (!ip_to_domain(pkt.ip.ip_dst))
-		printf("%s: ", inet_ntoa(pkt.ip.ip_dst));
+	if (!ip_to_domain(pkt.ip.ip_src))
+		printf("%s: ", inet_ntoa(pkt.ip.ip_src));
 	else
 	{
-		printf("%s (%s): ", ip_to_domain(pkt.ip.ip_dst),
+		printf("%s (%s): ", ip_to_domain(pkt.ip.ip_src),
 			inet_ntoa(pkt.ip.ip_dst));
 	}
 	if (pkt.icmp.icmp_code == ICMP_UNREACH_HOST)
@@ -79,12 +79,12 @@ static void	timeexceed_dump(t_fping pkt, t_info *info)
 	if (ntohs(pkt.ping.id) != info->pid)
 		return ;
 	printf("%lu bytes from ", ntohs(pkt.ip.ip_len) - sizeof(struct ip));
-	if (!ip_to_domain(pkt.ip.ip_dst))
-		printf("%s: ", inet_ntoa(pkt.ip.ip_dst));
+	if (!ip_to_domain(pkt.ip.ip_src))
+		printf("%s: ", inet_ntoa(pkt.ip.ip_src));
 	else
 	{
-		printf("%s (%s): ", ip_to_domain(pkt.ip.ip_dst),
-			inet_ntoa(pkt.ip.ip_dst));
+		printf("%s (%s): ", ip_to_domain(pkt.ip.ip_src),
+			inet_ntoa(pkt.ip.ip_src));
 	}
 	if (pkt.icmp.icmp_code == ICMP_TIMXCEED_INTRANS)
 		printf("Time to live exceeded");
