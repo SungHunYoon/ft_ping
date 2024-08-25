@@ -50,7 +50,7 @@ static void	ping_recv_proc(t_info *info, struct timeval time)
 	diff = diff_timeval(time);
 	while (diff <= 1000.0 && !g_stop)
 	{
-		tmp = 1000000 - (size_t)(diff * 1000);
+		tmp = (1000000 - (size_t)(diff * 1000)) / 2;
 		t.tv_sec = tmp / 1000000;
 		t.tv_usec = tmp % 1000000;
 		if (setsockopt(info->sock, SOL_SOCKET, SO_RCVTIMEO,
