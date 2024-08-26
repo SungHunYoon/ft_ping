@@ -99,7 +99,7 @@ void	parse_packet(t_fping pkt, t_info *info)
 	if (info->prev_seq != ntohs(pkt.icmp.icmp_seq))
 		info->recv_cnt++;
 	diff_time = diff_timeval(pkt.ping.time);
-	printf("%ld byte from ", ntohs(pkt.ip.ip_len) - sizeof(pkt.ip));
+	printf("%ld bytes from ", ntohs(pkt.ip.ip_len) - sizeof(pkt.ip));
 	printf("%s: ", inet_ntoa(pkt.ip.ip_src));
 	printf("icmp_seq=%d ", ntohs(pkt.icmp.icmp_seq));
 	printf("ttl=%d time=%.3lf ms", pkt.ip.ip_ttl, diff_time);
